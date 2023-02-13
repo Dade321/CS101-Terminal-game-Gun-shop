@@ -1,3 +1,6 @@
+import os
+os.system('cls') 
+
 #Defining main store class
 class Store:
     #Starting stock, budget and reputation
@@ -7,6 +10,10 @@ class Store:
     #Initializing new store
     def __init__(self, store_name) -> None:
         self.store_name =store_name;
+    #Defining method for repleneshing stock
+    #Defining method for checking store name, stock, reputation
+    #Defining method for setting gun prices
+    #Defining method for checking store budget, income, profit
 
 #Defining gun supplier class
 class Supplier:
@@ -14,6 +21,7 @@ class Supplier:
     supplier_stock = {"Pistol":10, "Shotgun":10, "Machine gun":10, "Sub-machine gun":10, "Hunting knife":10}
     def __init__(self) -> None:
         pass
+    #Defining a method for 
 
 #Defining Customer class
 class Customer:
@@ -31,3 +39,4 @@ class Market:
     hunting_knife = 100;
     def __init__(self) -> None:
         pass
+
