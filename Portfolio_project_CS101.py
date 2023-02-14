@@ -101,3 +101,18 @@ gun_market.change_all_prices(-10);
 gun_supplier.check_stock();
 new_store.add_to_stock(gun_market.market_prices);
 new_store.check_status();
+continue_dialog = input("'Enter to continue'");
+
+#Main loop
+while True:
+    #Defining actions the player can take
+    player_action = input("You decide to:\n(Check) shop status, stock\n(Call) supplier\n(Open) shop\n")
+    if player_action.lower == "check":
+        new_store.check_stock();
+    elif player_action.lower == "call":
+        new_store.add_to_stock(gun_market.market_prices);
+    elif player_action.lower == "open":
+        print("You open the shop for today")
+    else:
+        continue
+    break
