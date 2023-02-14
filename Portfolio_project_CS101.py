@@ -48,9 +48,12 @@ class Store:
                     elif exit_store_check.lower() == "n":
                         break
                     else:
-                        pass
-            
+                        pass       
     #Defining method for checking store name, stock, reputation
+    def check_status(self) -> None:
+        print("You are a proud owner of a gun store called {name}. Your current budget is {budget}. You currently have these items in stock:".format(name = self.store_name, budget = Store.store_budget))
+        for key, value in Store.current_stock.items():
+            print(str(value) + " × " + key)
     #Defining method for setting gun prices
     #Defining method for checking store budget, income, profit
 
@@ -97,3 +100,4 @@ gun_market = Market();
 gun_market.change_all_prices(-10);
 gun_supplier.check_stock();
 new_store.add_to_stock(gun_market.market_prices);
+new_store.check_status();
