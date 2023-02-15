@@ -11,9 +11,12 @@ class Store:
     def __init__(self, store_name) -> None:
         self.store_name =store_name;
     #Defining method for repleneshing stock
-    def add_to_stock(self, market_prices) -> None:
+    def add_to_stock(self, market_prices, supplier_stock) -> None:
         exit_store = 0;
         while exit_store == 0:
+            print("Whaddya need?");
+            for key, value in supplier_stock.items():
+                print(str(value) + " × " + key + " for " + str(market_prices[key]) + " each");
             add_to_stock_action = input("(Buy/Exit)?");
             if add_to_stock_action.lower() == "buy":
                 print("Your current budget is: " + str(Store.store_budget) + ". What would you like to buy?");
@@ -98,8 +101,7 @@ continue_dialog = input("'Enter to continue'");
 print("Ahh, what the hell. I'll make you a discount, 10% off, for old times sake. Just this time though")
 gun_market = Market();
 gun_market.change_all_prices(-10);
-gun_supplier.check_stock();
-new_store.add_to_stock(gun_market.market_prices);
+new_store.add_to_stock(gun_market.market_prices, gun_supplier.supplier_stock);
 new_store.check_status();
 continue_dialog = input("'Enter to continue'");
 
@@ -107,12 +109,13 @@ continue_dialog = input("'Enter to continue'");
 while True:
     #Defining actions the player can take
     player_action = input("You decide to:\n(Check) shop status, stock\n(Call) supplier\n(Open) shop\n")
-    if player_action.lower == "check":
-        new_store.check_stock();
-    elif player_action.lower == "call":
-        new_store.add_to_stock(gun_market.market_prices);
-    elif player_action.lower == "open":
-        print("You open the shop for today")
+    if player_action.lower() == "check":
+        new_store.check_status();
+    elif player_action.lower() == "call":
+        new_store.add_to_stock(gun_market.market_prices, gun_supplier.supplier_stock);
+    elif player_action.lower() == "open":
+        print("You open the shop for today");
+    elif player_action.lower() == "quit":
+        break
     else:
         continue
-    break
