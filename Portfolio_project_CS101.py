@@ -95,7 +95,7 @@ new_store = Store(store_name);
 print(store_name + " sounds about right. You step inside. After a quick assesment you realize that everything seems to be in order and ready for bussines altough the stores inventory is completly empty. You call your gun supplier");
 gun_supplier = Supplier();
 continue_dialog = input("'Enter to continue'");
-print("What's up? It's been a while. Whatcha need?");
+print("What's up? It's been a while. Whaddya need?");
 gun_supplier.check_stock()
 continue_dialog = input("'Enter to continue'");
 print("Ahh, what the hell. I'll make you a discount, 10% off, for old times sake. Just this time though")
