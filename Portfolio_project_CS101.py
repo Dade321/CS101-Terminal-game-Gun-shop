@@ -74,21 +74,26 @@ class Supplier:
 
 #Defining Customer class
 class Customer:
-    preference_list = [["Pistol", 0.5], ["Shotgun", 0.5], ["Machine gun", 0.5], ["Sub-machine gun", 0.5], ["Hunting knife", 0.5]];
+    preference_dict = {"Pistol":0.5, "Shotgun":0.5, "Machine gun":0.5, "Sub-machine gun":0.5, "Hunting knife":0.5};
+    preference_list = [];
     customer_budget = 1.0;
 #    customer_needs  = {"Pistol":0, "Shotgun":0, "Machine gun":0, "Sub-machine gun":0, "Hunting knife":0};
     def __init__(self) -> None:
         pass
     def set_preference(self):
-        for i in range(len(Customer.preference_list)):
+        for key in Customer.preference_dict.keys():
             preference_value = random.uniform(0.0, 1.0);
-            Customer.preference_list[i][1] = preference_value;
-        Customer.preference_list.sort(key=lambda x: x[1]);
+            Customer.preference_dict[key] = preference_value;
+        for key, value in Customer.preference_dict.items():
+            Customer.preference_list.append([key, value]);
+        Customer.preference_list.sort(key=lambda x: x[1], reverse=True);
     def set_customer_budget(self, market_prices):
         machine_gun_price = market_prices["Machine gun"];
         Customer.customer_budget = machine_gun_price + machine_gun_price/100*random.randint(-50, 50); 
     def express_prefferences(self):
-        print("Hy, I am looking for a " + Customer.preference_list[0][0] + ".\nA " + Customer.preference_list[1][0] + " would work aswell.\nAnd maybe you have a " + Customer.preference_list[2][0] + " too?")
+        expression = "Hy, I am looking for a {}. ({}%)\nA {} would work aswell.({}%)\nAnd maybe you have a {} too?({}%)"
+        print(expression.format(Customer.preference_list[0][0], int(Customer.preference_list[0][1] * 100), Customer.preference_list[1][0],  int(Customer.preference_list[1][1] * 100), Customer.preference_list[2][0],  int(Customer.preference_list[2][1] * 100)))
+        Customer.preference_list = [];
 #    def offer_a_gun(self):
 
 
