@@ -115,6 +115,10 @@ while True:
         new_store.add_to_stock(gun_market.market_prices, gun_supplier.supplier_stock);
     elif player_action.lower() == "open":
         print("You open the shop for today");
+        continue_dialog = input("'Enter to continue'");
+
+
+
     elif player_action.lower() == "quit":
         break
     else:
