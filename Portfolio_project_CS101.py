@@ -2,6 +2,8 @@ import os
 import random
 os.system('cls') 
 
+def linear_interpolation(x1, x2, y1, y2, x):
+    return y1 - abs(x1-x)*abs(y1-y2)/abs(x1-x2)
 #Defining main store class
 class Store:
     #Starting stock, budget and reputation
@@ -104,8 +106,23 @@ class Customer:
             print("Well, might aswell. For a good price(" + str(int(Customer.preference_dict[key] *100)) + "%)\n")
         elif Customer.preference_dict[key] < 0.3:
             print("Not really.(" + str(int(Customer.preference_dict[key] *100)) + "%)\n")
-
-
+    def check_chance_of_sale(self, market_prices, key):
+        market_price = market_prices[key];
+        chance_of_sale_p20 = Customer.preference_dict[key] * 100;
+        price_change = [-50, -40, -30, -20, -10, 0, 10, 20, 30, 40, 50];
+        lowest_change = price_change[0];
+        chance_of_sale = [chance_of_sale_p20 + 50, 1, 2, 3, 4, 5, 6, chance_of_sale_p20, 8, 9, chance_of_sale_p20 - 50];
+        for index in chance_of_sale[1:7]:
+            chance_of_sale[index] = linear_interpolation(-50, 20, chance_of_sale[0], chance_of_sale[7], price_change[index]);
+        for index in chance_of_sale[8:10]:
+            chance_of_sale[index] = linear_interpolation(20, 50, chance_of_sale[7], chance_of_sale[10], price_change[index]);
+        for chance in chance_of_sale:
+            if lowest_change != 0:
+                print("Offer " + str(lowest_change) + "%. For a price of " + str(int(market_price + market_price/100*lowest_change)) + ".(" + str(int(chance)) + "%)" );
+                lowest_change += 10;
+            else:
+                print("Offer " + str(lowest_change) + "%. For a price of " + str(int(market_price)) + ".(" + str(int(chance)) + ")" );
+                lowest_change += 10;
 #Defining market class
 class Market:
     #pistol, shotgun, machine_gun, sub_machine_gun, hunting_knife;
@@ -156,25 +173,36 @@ while True:
             while True:
                 if next_customer == 1:
                     break
-                print("(Check) if the customer prefers a gun\n(Offer) a gun\nTell the customer that you can't (help) him");
+                print("\n You decide to:\n(Check) if the customer prefers a gun\n(Offer) a gun\nTell the customer that you can't (help) him");
                 player_action = input();
                 if player_action.lower() == "check":
                     while True:
-                        gun_offer = input("Which gun would you like to check with the customer?")
+                        gun_check = input("\nWhich gun would you like to check with the customer?")
+                        gun_check = gun_check.capitalize()
+                        try:
+                            customer_1.preference_dict[gun_check]
+                        except Exception:
+                            continue
+                        else:
+                            customer_1.check_preference(gun_check)
+                            break
+                elif player_action.lower() == "offer":
+                    while True:
+                        gun_offer = input("\nWhich gun would you like to offer to the customer?")
                         gun_offer = gun_offer.capitalize()
                         try:
                             customer_1.preference_dict[gun_offer]
                         except Exception:
                             continue
                         else:
-                            customer_1.check_preference(gun_offer)
+                            print("The current market price for this gun: " + str(int(gun_market.market_prices[gun_offer])) + ".")
+                            print("How much would you like to alter the price?")
+                            customer_1.check_chance_of_sale(gun_market.market_prices, gun_offer)
                             break
-                elif player_action.lower() == "offer":
-                    while True:
-                        pass
+
                 elif player_action.lower() == "help":
                     while True:
-                        player_action = input("Are you sure? (y/n)");
+                        player_action = input("\nAre you sure? (y/n)");
                         if player_action.lower() == "y":
                             print("That's fine I'll check the other stores.");
                             next_customer = 1;
