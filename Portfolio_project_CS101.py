@@ -94,9 +94,16 @@ class Customer:
         expression = "Hy, I am looking for a {}. ({}%)\nA {} would work aswell.({}%)\nAnd maybe you have a {} too?({}%)"
         print(expression.format(Customer.preference_list[0][0], int(Customer.preference_list[0][1] * 100), Customer.preference_list[1][0],  int(Customer.preference_list[1][1] * 100), Customer.preference_list[2][0],  int(Customer.preference_list[2][1] * 100)))
         Customer.preference_list = [];
-#    def offer_a_gun(self):
-
-
+    def check_preference(self, key):
+        print("Would you be intereseted in a " + key + "?");
+        if Customer.preference_dict[key] >= 0.9:
+            print("Sure! That would be great.(" + str(int(Customer.preference_dict[key] *100)) + "%)\n")
+        elif Customer.preference_dict[key] < 0.9 and Customer.preference_dict[key] >= 0.6:
+            print("Yeah, why not.(" + str(int(Customer.preference_dict[key]) *100) + "%)\n")
+        elif Customer.preference_dict[key] < 0.6 and Customer.preference_dict[key] >= 0.3:
+            print("Well, might aswell. For a good price(" + str(int(Customer.preference_dict[key] *100)) + "%)\n")
+        elif Customer.preference_dict[key] < 0.3:
+            print("Not really.(" + str(int(Customer.preference_dict[key] *100)) + "%)\n")
 
 
 #Defining market class
@@ -140,11 +147,45 @@ while True:
         continue_dialog = input("'Enter to continue'\n");
         print("You open for bussines and wait for a next customer. It's day " + str(day_counter) + ".")
         while True:
+            print("\nA customer walks in.\n")
+            next_customer = 0;
             customer_1 = Customer();
             customer_1.set_preference();
             customer_1.set_customer_budget(gun_market.market_prices);
             customer_1.express_prefferences();
-            break
+            while True:
+                if next_customer == 1:
+                    break
+                print("(Check) if the customer prefers a gun\n(Offer) a gun\nTell the customer that you can't (help) him");
+                player_action = input();
+                if player_action.lower() == "check":
+                    while True:
+                        gun_offer = input("Which gun would you like to check with the customer?")
+                        gun_offer = gun_offer.capitalize()
+                        try:
+                            customer_1.preference_dict[gun_offer]
+                        except Exception:
+                            continue
+                        else:
+                            customer_1.check_preference(gun_offer)
+                            break
+                elif player_action.lower() == "offer":
+                    while True:
+                        pass
+                elif player_action.lower() == "help":
+                    while True:
+                        player_action = input("Are you sure? (y/n)");
+                        if player_action.lower() == "y":
+                            print("That's fine I'll check the other stores.");
+                            next_customer = 1;
+                            continue_dialog = input("'Enter to continue'\n");
+                            break
+                        elif player_action.lower() == "n":
+                            break
+                        else:
+                            continue
+                else:
+                    continue
     elif player_action.lower() == "quit":
         break
     else:
