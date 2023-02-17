@@ -60,7 +60,6 @@ class Store:
         print("\nYou are a proud owner of a gun store called {name}. Your current budget is {budget}. You currently have these items in stock:".format(name = self.store_name, budget = Store.store_budget))
         for key, value in Store.current_stock.items():
             print(str(value) + " × " + key)
-    #Defining method for setting gun prices
     #Defining method for checking store budget, income, profit
 
 #Defining gun supplier class
@@ -78,25 +77,31 @@ class Supplier:
 class Customer:
     preference_dict = {"Pistol":0.5, "Shotgun":0.5, "Machine gun":0.5, "Sub-machine gun":0.5, "Hunting knife":0.5};
     preference_list = [];
+    altered_price_dict = {-50:0, -40:0, -30:0, -20:0, -10:0, 0:0, 10:0, 20:0, 30:0, 40:0, 50:0};
+    chance_of_sale_dict = {-50:0, -40:0, -30:0, -20:0, -10:0, 0:0, 10:0, 20:0, 30:0, 40:0, 50:0};
     customer_budget = 1.0;
 #    customer_needs  = {"Pistol":0, "Shotgun":0, "Machine gun":0, "Sub-machine gun":0, "Hunting knife":0};
     def __init__(self) -> None:
         pass
-    def set_preference(self):
+    
+    def set_preference(self) -> None:
         for key in Customer.preference_dict.keys():
             preference_value = random.uniform(0.0, 1.0);
             Customer.preference_dict[key] = preference_value;
         for key, value in Customer.preference_dict.items():
             Customer.preference_list.append([key, value]);
         Customer.preference_list.sort(key=lambda x: x[1], reverse=True);
-    def set_customer_budget(self, market_prices):
+    
+    def set_customer_budget(self, market_prices) -> None:
         machine_gun_price = market_prices["Machine gun"];
         Customer.customer_budget = machine_gun_price + machine_gun_price/100*random.randint(-50, 50); 
-    def express_prefferences(self):
+    
+    def express_prefferences(self) -> None:
         expression = "Hy, I am looking for a {}. ({}%)\nA {} would work aswell.({}%)\nAnd maybe you have a {} too?({}%)"
         print(expression.format(Customer.preference_list[0][0], int(Customer.preference_list[0][1] * 100), Customer.preference_list[1][0],  int(Customer.preference_list[1][1] * 100), Customer.preference_list[2][0],  int(Customer.preference_list[2][1] * 100)))
         Customer.preference_list = [];
-    def check_preference(self, key):
+    
+    def check_preference(self, key) -> None:
         print("Would you be intereseted in a " + key + "?");
         if Customer.preference_dict[key] >= 0.9:
             print("Sure! That would be great.(" + str(int(Customer.preference_dict[key] *100)) + "%)\n")
@@ -106,7 +111,8 @@ class Customer:
             print("Well, might aswell. For a good price(" + str(int(Customer.preference_dict[key] *100)) + "%)\n")
         elif Customer.preference_dict[key] < 0.3:
             print("Not really.(" + str(int(Customer.preference_dict[key] *100)) + "%)\n")
-    def check_chance_of_sale(self, market_prices, key):
+
+    def check_chance_of_sale(self, market_prices, key) -> None:
         market_price = market_prices[key];
         chance_of_sale_p20 = Customer.preference_dict[key] * 100;
         price_change = [-50, -40, -30, -20, -10, 0, 10, 20, 30, 40, 50];
@@ -118,11 +124,20 @@ class Customer:
             chance_of_sale[index] = linear_interpolation(20, 50, chance_of_sale[7], chance_of_sale[10], price_change[index]);
         for chance in chance_of_sale:
             if lowest_change != 0:
-                print("Offer " + str(lowest_change) + "%. For a price of " + str(int(market_price + market_price/100*lowest_change)) + ".(" + str(int(chance)) + "%)" );
+                altered_price = int(market_price + market_price/100*lowest_change);
+                Customer.altered_price_dict[lowest_change] = altered_price;
+                Customer.chance_of_sale_dict[lowest_change] = int(chance);
+                print("Offer " + str(lowest_change) + "%. For a price of " + str(altered_price) + ".(" + str(int(chance)) + "%)" );
                 lowest_change += 10;
             else:
+                Customer.altered_price_dict[lowest_change] = int(market_price);
+                Customer.chance_of_sale_dict[lowest_change] = int(chance);
                 print("Offer " + str(lowest_change) + "%. For a price of " + str(int(market_price)) + ".(" + str(int(chance)) + ")" );
                 lowest_change += 10;
+                
+    def attempt_sale(self, gun, price, chance_of_sale) -> None:
+        print("\nYou offer a " + gun + " for " + str(price));
+
 #Defining market class
 class Market:
     #pistol, shotgun, machine_gun, sub_machine_gun, hunting_knife;
@@ -171,9 +186,10 @@ while True:
             customer_1.set_customer_budget(gun_market.market_prices);
             customer_1.express_prefferences();
             while True:
+                go_back = 0;
                 if next_customer == 1:
                     break
-                print("\n You decide to:\n(Check) if the customer prefers a gun\n(Offer) a gun\nTell the customer that you can't (help) him");
+                print("\nYou decide to:\n(Check) if the customer prefers a gun\n(Offer) a gun\nTell the customer that you can't (help) him");
                 player_action = input();
                 if player_action.lower() == "check":
                     while True:
@@ -188,6 +204,8 @@ while True:
                             break
                 elif player_action.lower() == "offer":
                     while True:
+                        if go_back == 1:
+                            break
                         gun_offer = input("\nWhich gun would you like to offer to the customer?")
                         gun_offer = gun_offer.capitalize()
                         try:
@@ -198,7 +216,23 @@ while True:
                             print("The current market price for this gun: " + str(int(gun_market.market_prices[gun_offer])) + ".")
                             print("How much would you like to alter the price?")
                             customer_1.check_chance_of_sale(gun_market.market_prices, gun_offer)
-                            break
+                            while True:
+                                print("\nYou decide to:\nAttempt a sale(choose price change)\nOffer a (different) gun\nGo (back)");
+                                player_action = input();
+                                try:
+                                    int(player_action);
+                                except ValueError:
+                                    if player_action.lower() == "different":
+                                        break
+                                    elif player_action.lower() == "back":
+                                        go_back = 1;
+                                        break
+                                    else:
+                                        continue
+                                else:
+                                    if int(player_action) in customer_1.altered_price_dict:
+                                        customer_1.attempt_sale(gun_offer, customer_1.altered_price_dict[int(player_action)], customer_1.chance_of_sale_dict[int(player_action)])
+
 
                 elif player_action.lower() == "help":
                     while True:
