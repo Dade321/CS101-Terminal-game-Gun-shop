@@ -7,8 +7,8 @@ def linear_interpolation(x1, x2, y1, y2, x):
 #Defining main store class
 class Store:
     #Starting stock, budget and reputation
-    current_stock = {"Pistol":0, "Shotgun":0, "Machine gun":0, "Sub-machine gun":0, "Hunting knife":0};
-    store_budget = 2000;
+    current_stock = {"Pistol":3, "Shotgun":1, "Machine gun":0, "Sub-machine gun":0, "Hunting knife":3};
+    store_budget = 1000;
     reputation = 0;
     #Initializing new store
     def __init__(self, store_name) -> None:
@@ -137,6 +137,32 @@ class Customer:
                 
     def attempt_sale(self, gun, price, chance_of_sale) -> None:
         print("\nYou offer a " + gun + " for " + str(price));
+        print("The customer checks his budget and thinks a bit")
+        input("'Enter to continue'");
+        random_number = random.random() * 100;
+        if random_number >= chance_of_sale and Customer.customer_budget >= price:
+            print("\nSounds like a deal!")
+            Customer.customer_budget -= price;
+            Store.store_budget += price;
+            Store.current_stock[gun] -= 1;
+        elif random_number >= chance_of_sale:
+            print("\nSounds great, but I am afraid I can't afford it. Would you agree on " + str(Customer.customer_budget) + "? (y/n)")
+            while True:
+                player_response = input()
+                if player_response.lower() == "y":
+                    Customer.customer_budget = 0;
+                    Store.store_budget += Customer.customer_budget;
+                    Store.current_stock[gun] -= 1;
+                    print("Great! Thanks a lot")
+                    #next customer
+                elif player_response.lower() == "n":
+                    print("Oh well.")
+                    break
+                else:
+                    continue
+        else:
+            print("That won't work for me")
+        
 
 #Defining market class
 class Market:
@@ -152,7 +178,8 @@ class Market:
 print("You stand in front of your new store. You decide you gonna call it:\n");
 store_name = input();
 new_store = Store(store_name);
-print("\n" + store_name + " sounds about right. You step inside. After a quick assesment you realize that everything seems to be in order and ready for bussines altough the stores inventory is completly empty. You call your gun supplier");
+new_store.check_status();
+print("\n" + store_name + " sounds about right. You step inside. After a quick assesment you realize that everything seems to be in order and ready for bussiness altough the stores inventory seems a little empty. You call your gun supplier");
 gun_supplier = Supplier();
 continue_dialog = input("'Enter to continue'");
 print("\nWhat's up? It's been a while. Whaddya need?");
@@ -175,9 +202,8 @@ while True:
     elif player_action.lower() == "call":
         new_store.add_to_stock(gun_market.market_prices, gun_supplier.supplier_stock);
     elif player_action.lower() == "open":
-        print("\nYou open the shop for today");
+        print("\nYou open for bussines and wait for a next customer. It's day " + str(day_counter) + ".")
         continue_dialog = input("'Enter to continue'\n");
-        print("You open for bussines and wait for a next customer. It's day " + str(day_counter) + ".")
         while True:
             print("\nA customer walks in.\n")
             next_customer = 0;
@@ -208,6 +234,9 @@ while True:
                             break
                         gun_offer = input("\nWhich gun would you like to offer to the customer?")
                         gun_offer = gun_offer.capitalize()
+                        if new_store.current_stock[gun_offer] == 0:
+                            print("You don't have this item in stock")
+                            break
                         try:
                             customer_1.preference_dict[gun_offer]
                         except Exception:
@@ -232,7 +261,7 @@ while True:
                                 else:
                                     if int(player_action) in customer_1.altered_price_dict:
                                         customer_1.attempt_sale(gun_offer, customer_1.altered_price_dict[int(player_action)], customer_1.chance_of_sale_dict[int(player_action)])
-
+                                        break
 
                 elif player_action.lower() == "help":
                     while True:
