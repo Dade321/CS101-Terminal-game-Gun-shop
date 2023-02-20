@@ -167,6 +167,7 @@ class Customer:
 #Defining market class
 class Market:
     #pistol, shotgun, machine_gun, sub_machine_gun, hunting_knife;
+    base_market_prices = {"Pistol":200.0, "Shotgun":300.0, "Machine gun":1000.0, "Sub-machine gun":700.0, "Hunting knife":100.0};
     market_prices = {"Pistol":200.0, "Shotgun":300.0, "Machine gun":1000.0, "Sub-machine gun":700.0, "Hunting knife":100.0};
     def __init__(self) -> None:
         pass
@@ -216,6 +217,7 @@ while True:
                 if next_customer == 1:
                     break
                 print("\nYou decide to:\n(Check) if the customer prefers a gun\n(Offer) a gun\nTell the customer that you can't (help) him");
+                #needs an option to check store stock
                 player_action = input();
                 if player_action.lower() == "check":
                     while True:
@@ -234,7 +236,7 @@ while True:
                             break
                         gun_offer = input("\nWhich gun would you like to offer to the customer?")
                         gun_offer = gun_offer.capitalize()
-                        if new_store.current_stock[gun_offer] == 0:
+                        if gun_offer not in new_store.current_stock or new_store.current_stock[gun_offer] == 0:
                             print("You don't have this item in stock")
                             break
                         try:
@@ -261,6 +263,7 @@ while True:
                                 else:
                                     if int(player_action) in customer_1.altered_price_dict:
                                         customer_1.attempt_sale(gun_offer, customer_1.altered_price_dict[int(player_action)], customer_1.chance_of_sale_dict[int(player_action)])
+                                        #finish implementing
                                         break
 
                 elif player_action.lower() == "help":
