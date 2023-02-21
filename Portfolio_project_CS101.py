@@ -97,20 +97,28 @@ class Customer:
         Customer.customer_budget = machine_gun_price + machine_gun_price/100*random.randint(-50, 50); 
     
     def express_prefferences(self) -> None:
-        expression = "Hy, I am looking for a {}. ({}%)\nA {} would work aswell.({}%)\nAnd maybe you have a {} too?({}%)"
+        expression = "\nI am looking for a {}. ({}%)\nA {} would work aswell.({}%)\nAnd maybe you have a {} too?({}%)"
         print(expression.format(Customer.preference_list[0][0], int(Customer.preference_list[0][1] * 100), Customer.preference_list[1][0],  int(Customer.preference_list[1][1] * 100), Customer.preference_list[2][0],  int(Customer.preference_list[2][1] * 100)))
-        Customer.preference_list = [];
+        print("Customers budget " + str(Customer.customer_budget))
     
     def check_preference(self, key) -> None:
-        print("Would you be intereseted in a " + key + "?");
+        print("\nWould you be intereseted in a " + key + "?");
         if Customer.preference_dict[key] >= 0.9:
-            print("Sure! That would be great.(" + str(int(Customer.preference_dict[key] *100)) + "%)\n")
+            percentage = str(int(Customer.preference_dict[key]*100))
+            print("Sure! That would be great.(" + percentage + "%)\n")
+            #print(Customer.preference_dict[key]*100)
         elif Customer.preference_dict[key] < 0.9 and Customer.preference_dict[key] >= 0.6:
-            print("Yeah, why not.(" + str(int(Customer.preference_dict[key]) *100) + "%)\n")
+            percentage = str(int(Customer.preference_dict[key]*100))
+            print("Yeah, why not.(" + percentage + "%)\n")
+            #print(Customer.preference_dict[key]*100)
         elif Customer.preference_dict[key] < 0.6 and Customer.preference_dict[key] >= 0.3:
-            print("Well, might aswell. For a good price(" + str(int(Customer.preference_dict[key] *100)) + "%)\n")
+            percentage = str(int(Customer.preference_dict[key]*100))
+            print("Well, might aswell. For a good price(" + percentage + "%)\n")
+            #print(Customer.preference_dict[key] *100)
         elif Customer.preference_dict[key] < 0.3:
-            print("Not really.(" + str(int(Customer.preference_dict[key] *100)) + "%)\n")
+            percentage = str(int(Customer.preference_dict[key]*100))
+            print("Not really.(" + percentage + "%)\n")
+            #print(Customer.preference_dict[key]*100)
 
     def check_chance_of_sale(self, market_prices, key) -> None:
         market_price = market_prices[key];
@@ -140,12 +148,17 @@ class Customer:
         print("The customer checks his budget and thinks a bit")
         input("'Enter to continue'");
         random_number = random.random() * 100;
-        if random_number >= chance_of_sale and Customer.customer_budget >= price:
-            print("\nSounds like a deal!")
+        if random_number <= chance_of_sale and Customer.customer_budget >= price:
+            print("\nSounds like a deal!\n")
             Customer.customer_budget -= price;
             Store.store_budget += price;
             Store.current_stock[gun] -= 1;
-        elif random_number >= chance_of_sale:
+            Customer.preference_dict[gun] = 0.0;
+            Customer.preference_list = []
+            for key, value in Customer.preference_dict.items():
+                Customer.preference_list.append([key, value]);
+            Customer.preference_list.sort(key=lambda x: x[1], reverse=True);
+        elif random_number <= chance_of_sale:
             print("\nSounds great, but I am afraid I can't afford it. Would you agree on " + str(Customer.customer_budget) + "? (y/n)")
             while True:
                 player_response = input()
@@ -156,12 +169,17 @@ class Customer:
                     print("Great! Thanks a lot")
                     #next customer
                 elif player_response.lower() == "n":
-                    print("Oh well.")
+                    print("Oh well.\n")
                     break
                 else:
                     continue
         else:
-            print("That won't work for me")
+            print("That won't work for me\n")
+            Customer.preference_dict[gun] = Customer.preference_dict[gun]/4;
+            Customer.preference_list = []
+            for key, value in Customer.preference_dict.items():
+                Customer.preference_list.append([key, value]);
+            Customer.preference_list.sort(key=lambda x: x[1], reverse=True);
         
 
 #Defining market class
@@ -174,10 +192,14 @@ class Market:
     def change_all_prices(self, change) -> None:
         for key, value in Market.market_prices.items():
             Market.market_prices[key] = value + (value/100*change);
+    def alter_prices(self) -> None:
+        for key, value in Market.market_prices.items():
+            Market.market_prices[key] = int(value + (value/100*random.randint(-20, 20)));
 
 #Intro sequance
 print("You stand in front of your new store. You decide you gonna call it:\n");
 store_name = input();
+customer_1 = Customer();
 new_store = Store(store_name);
 new_store.check_status();
 print("\n" + store_name + " sounds about right. You step inside. After a quick assesment you realize that everything seems to be in order and ready for bussiness altough the stores inventory seems a little empty. You call your gun supplier");
@@ -193,31 +215,44 @@ new_store.add_to_stock(gun_market.market_prices, gun_supplier.supplier_stock);
 new_store.check_status();
 continue_dialog = input("'Enter to continue'");
 
-day_counter = 0;
+day_counter = 1;
+alter_prices = 1;
 #Main loop
 while True:
+    customer_count = 0;
+    if alter_prices == 1:
+        gun_market.alter_prices()
+        alter_prices = 0
+    print("\nYou still have some time today")
     #Defining actions the player can take
-    player_action = input("\nYou decide to:\n(Check) shop status, stock\n(Call) supplier\n(Open) shop\n")
+    player_action = input("\nYou decide to:\n(Check) shop status, stock\n(Call) supplier\n Go home and (Open) shop in the morning\n")
     if player_action.lower() == "check":
         new_store.check_status();
     elif player_action.lower() == "call":
         new_store.add_to_stock(gun_market.market_prices, gun_supplier.supplier_stock);
     elif player_action.lower() == "open":
-        print("\nYou open for bussines and wait for a next customer. It's day " + str(day_counter) + ".")
+        print("\nYou return in the morning and open for bussines. It's day " + str(day_counter) + ".")
+        day_counter += 1;
+        alter_prices = 1;
         continue_dialog = input("'Enter to continue'\n");
         while True:
-            print("\nA customer walks in.\n")
+            print("\nA customer walks in.")
+            if customer_count == 3:
+                print("It seems there won't be anymore customers today, you decide to close shop")
+                break
+            customer_count += 1;
             next_customer = 0;
-            customer_1 = Customer();
+            customer_1.preference_list = [];
             customer_1.set_preference();
             customer_1.set_customer_budget(gun_market.market_prices);
-            customer_1.express_prefferences();
             while True:
                 go_back = 0;
                 if next_customer == 1:
+                    print("You wait for another customer")
+                    continue_dialog = input("'Enter to continue'\n");
                     break
-                print("\nYou decide to:\n(Check) if the customer prefers a gun\n(Offer) a gun\nTell the customer that you can't (help) him");
-                #needs an option to check store stock
+                customer_1.express_prefferences();
+                print("\nYou decide to:\nCheck stores current (stock)\n(Check) if the customer preffers a gun\n(Offer) a gun\nTell the customer that you can't (help) him");
                 player_action = input();
                 if player_action.lower() == "check":
                     while True:
@@ -230,6 +265,8 @@ while True:
                         else:
                             customer_1.check_preference(gun_check)
                             break
+                elif player_action.lower() == "stock":
+                    new_store.check_status();
                 elif player_action.lower() == "offer":
                     while True:
                         if go_back == 1:
@@ -244,10 +281,11 @@ while True:
                         except Exception:
                             continue
                         else:
-                            print("The current market price for this gun: " + str(int(gun_market.market_prices[gun_offer])) + ".")
-                            print("How much would you like to alter the price?")
-                            customer_1.check_chance_of_sale(gun_market.market_prices, gun_offer)
+
                             while True:
+                                print("The current market price for this gun: " + str(int(gun_market.market_prices[gun_offer])) + ".")
+                                print("How much would you like to alter the price?")
+                                customer_1.check_chance_of_sale(gun_market.market_prices, gun_offer)
                                 print("\nYou decide to:\nAttempt a sale(choose price change)\nOffer a (different) gun\nGo (back)");
                                 player_action = input();
                                 try:
@@ -257,13 +295,18 @@ while True:
                                         break
                                     elif player_action.lower() == "back":
                                         go_back = 1;
+                                        next_customer = 1;
                                         break
                                     else:
                                         continue
                                 else:
                                     if int(player_action) in customer_1.altered_price_dict:
                                         customer_1.attempt_sale(gun_offer, customer_1.altered_price_dict[int(player_action)], customer_1.chance_of_sale_dict[int(player_action)])
-                                        #finish implementing
+                                        if customer_1.customer_budget == 0:
+                                            print("Looks like am all out of cash. Thanks again.")
+                                            go_back = 1
+                                            break
+                                        go_back = 1
                                         break
 
                 elif player_action.lower() == "help":
@@ -271,8 +314,9 @@ while True:
                         player_action = input("\nAre you sure? (y/n)");
                         if player_action.lower() == "y":
                             print("That's fine I'll check the other stores.");
+                            print("Customer walks out of the store")
                             next_customer = 1;
-                            continue_dialog = input("'Enter to continue'\n");
+                            continue_dialog = input("'Enter to continue'");
                             break
                         elif player_action.lower() == "n":
                             break
