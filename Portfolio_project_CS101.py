@@ -56,10 +56,10 @@ class Store:
                     else:
                         pass       
     #Defining method for checking store name, stock, reputation
-    def check_status(self) -> None:
+    def check_status(self, market_prices) -> None:
         print("\nYou are a proud owner of a gun store called {name}. Your current budget is {budget}. You currently have these items in stock:".format(name = self.store_name, budget = Store.store_budget))
         for key, value in Store.current_stock.items():
-            print(str(value) + " × " + key)
+            print(str(value) + " × " + key + ". Price- " + market_prices[key])
     #Defining method for checking store budget, income, profit
 
 #Defining gun supplier class
@@ -85,6 +85,7 @@ class Customer:
         pass
     
     def set_preference(self) -> None:
+        Customer.preference_list = [];
         for key in Customer.preference_dict.keys():
             preference_value = random.uniform(0.0, 1.0);
             Customer.preference_dict[key] = preference_value;
@@ -167,7 +168,7 @@ class Customer:
                     Store.store_budget += Customer.customer_budget;
                     Store.current_stock[gun] -= 1;
                     print("Great! Thanks a lot")
-                    #next customer
+                    break
                 elif player_response.lower() == "n":
                     print("Oh well.\n")
                     break
@@ -193,15 +194,17 @@ class Market:
         for key, value in Market.market_prices.items():
             Market.market_prices[key] = value + (value/100*change);
     def alter_prices(self) -> None:
-        for key, value in Market.market_prices.items():
+        for key, value in Market.base_market_prices.items():
             Market.market_prices[key] = int(value + (value/100*random.randint(-20, 20)));
+
 
 #Intro sequance
 print("You stand in front of your new store. You decide you gonna call it:\n");
 store_name = input();
 customer_1 = Customer();
 new_store = Store(store_name);
-new_store.check_status();
+gun_market = Market();
+new_store.check_status(gun_market.market_prices);
 print("\n" + store_name + " sounds about right. You step inside. After a quick assesment you realize that everything seems to be in order and ready for bussiness altough the stores inventory seems a little empty. You call your gun supplier");
 gun_supplier = Supplier();
 continue_dialog = input("'Enter to continue'");
@@ -209,10 +212,9 @@ print("\nWhat's up? It's been a while. Whaddya need?");
 gun_supplier.check_stock()
 continue_dialog = input("'Enter to continue'");
 print("\nAhh, what the hell. I'll make you a discount, 10% off, for old times sake. Just this time though.")
-gun_market = Market();
 gun_market.change_all_prices(-10);
 new_store.add_to_stock(gun_market.market_prices, gun_supplier.supplier_stock);
-new_store.check_status();
+new_store.check_status(gun_market.market_prices);
 continue_dialog = input("'Enter to continue'");
 
 day_counter = 1;
@@ -225,9 +227,9 @@ while True:
         alter_prices = 0
     print("\nYou still have some time today")
     #Defining actions the player can take
-    player_action = input("\nYou decide to:\n(Check) shop status, stock\n(Call) supplier\n Go home and (Open) shop in the morning\n")
+    player_action = input("\nYou decide to:\n(Check) shop status, stock\n(Call) supplier\nGo home and (Open) shop in the morning\n")
     if player_action.lower() == "check":
-        new_store.check_status();
+        new_store.check_status(gun_market.market_prices);
     elif player_action.lower() == "call":
         new_store.add_to_stock(gun_market.market_prices, gun_supplier.supplier_stock);
     elif player_action.lower() == "open":
@@ -236,23 +238,23 @@ while True:
         alter_prices = 1;
         continue_dialog = input("'Enter to continue'\n");
         while True:
-            print("\nA customer walks in.")
             if customer_count == 3:
                 print("It seems there won't be anymore customers today, you decide to close shop")
                 break
+            print("\nA customer walks in.")
             customer_count += 1;
             next_customer = 0;
-            customer_1.preference_list = [];
+            #customer_1.preference_list = [];
             customer_1.set_preference();
             customer_1.set_customer_budget(gun_market.market_prices);
             while True:
                 go_back = 0;
                 if next_customer == 1:
-                    print("You wait for another customer")
+                    print("\nYou wait for another customer")
                     continue_dialog = input("'Enter to continue'\n");
                     break
                 customer_1.express_prefferences();
-                print("\nYou decide to:\nCheck stores current (stock)\n(Check) if the customer preffers a gun\n(Offer) a gun\nTell the customer that you can't (help) him");
+                print("\nYou decide to:\nCheck stores current (stock) and current market prices\n(Check) if the customer preffers a gun\n(Offer) a gun\nTell the customer that you can't help him and wait for a (next) customer");
                 player_action = input();
                 if player_action.lower() == "check":
                     while True:
@@ -266,7 +268,7 @@ while True:
                             customer_1.check_preference(gun_check)
                             break
                 elif player_action.lower() == "stock":
-                    new_store.check_status();
+                    new_store.check_status(gun_market.market_prices);
                 elif player_action.lower() == "offer":
                     while True:
                         if go_back == 1:
@@ -302,14 +304,15 @@ while True:
                                 else:
                                     if int(player_action) in customer_1.altered_price_dict:
                                         customer_1.attempt_sale(gun_offer, customer_1.altered_price_dict[int(player_action)], customer_1.chance_of_sale_dict[int(player_action)])
-                                        if customer_1.customer_budget == 0:
-                                            print("Looks like am all out of cash. Thanks again.")
-                                            go_back = 1
-                                            break
+                                    if customer_1.customer_budget == 0:
+                                        print("Looks like am all out of cash. Thanks again.")
+                                        next_customer = 1
                                         go_back = 1
                                         break
+                                    go_back = 1
+                                    break
 
-                elif player_action.lower() == "help":
+                elif player_action.lower() == "next":
                     while True:
                         player_action = input("\nAre you sure? (y/n)");
                         if player_action.lower() == "y":
