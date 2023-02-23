@@ -2,17 +2,21 @@ import os
 import random
 os.system('cls') 
 
+#Additional functions
 def linear_interpolation(x1, x2, y1, y2, x):
     return y1 - abs(x1-x)*abs(y1-y2)/abs(x1-x2)
-#Defining main store class
+
+#Main classess
+
 class Store:
-    #Starting stock, budget and reputation
+    #Starting stock, budget
     current_stock = {"Pistol":3, "Shotgun":1, "Machine gun":0, "Sub-machine gun":0, "Hunting knife":3};
     store_budget = 1000;
-    reputation = 0;
-    #Initializing new store
+
+    #Initializing class
     def __init__(self, store_name) -> None:
         self.store_name =store_name;
+    
     #Defining method for repleneshing stock
     def add_to_stock(self, market_prices, supplier_stock) -> None:
         exit_store = 0;
@@ -55,35 +59,41 @@ class Store:
                         break
                     else:
                         pass       
+    
     #Defining method for checking store name, stock, reputation
     def check_status(self) -> None:
         print("\nYou are a proud owner of a gun store called {name}. Your current budget is {budget}. You currently have these items in stock:".format(name = self.store_name, budget = Store.store_budget))
         for key, value in Store.current_stock.items():
             print(str(value) + " × " + key)
-    #Defining method for checking store budget, income, profit
 
-#Defining gun supplier class
+
 class Supplier:
     #Defining suppliers initial stock
     supplier_stock = {"Pistol":10, "Shotgun":10, "Machine gun":10, "Sub-machine gun":10, "Hunting knife":10};
+
+    #Initializing class
     def __init__(self) -> None:
         pass
+    
     #Defining a method for checking stock
     def check_stock(self) -> None:
         for key, value in Supplier.supplier_stock.items():
             print(str(value) + " × " + key + " for " + str(Market.market_prices[key]) + " each")
 
-#Defining Customer class
+
 class Customer:
+    #Customers preference dictionary and lists, items which sale is being attempted price dictionary and chance of sale dictionary with discount as a key and customers budget
     preference_dict = {"Pistol":0.5, "Shotgun":0.5, "Machine gun":0.5, "Sub-machine gun":0.5, "Hunting knife":0.5};
     preference_list = [];
     altered_price_dict = {-50:0, -40:0, -30:0, -20:0, -10:0, 0:0, 10:0, 20:0, 30:0, 40:0, 50:0};
     chance_of_sale_dict = {-50:0, -40:0, -30:0, -20:0, -10:0, 0:0, 10:0, 20:0, 30:0, 40:0, 50:0};
     customer_budget = 1.0;
-#    customer_needs  = {"Pistol":0, "Shotgun":0, "Machine gun":0, "Sub-machine gun":0, "Hunting knife":0};
+
+    #Initializes class
     def __init__(self) -> None:
         pass
-    
+
+    #Sets customers prference(percentage from 0 to 100), stores them in a preference dictionary and in a sorted preference list
     def set_preference(self) -> None:
         Customer.preference_list = [];
         for key in Customer.preference_dict.keys():
@@ -93,15 +103,18 @@ class Customer:
             Customer.preference_list.append([key, value]);
         Customer.preference_list.sort(key=lambda x: x[1], reverse=True);
     
+    #Sets customer budget. Budget is set by taking a Machine guns price and adding percentage from -50 to 50
     def set_customer_budget(self, market_prices) -> None:
         machine_gun_price = market_prices["Machine gun"];
         Customer.customer_budget = int(machine_gun_price + machine_gun_price/100*random.randint(-50, 50)); 
     
+    #Prints customers preferences
     def express_prefferences(self) -> None:
         expression = "\nI am looking for a {}. ({}%)\nA {} would work aswell.({}%)\nAnd maybe you have a {} too?({}%)"
         print(expression.format(Customer.preference_list[0][0], int(Customer.preference_list[0][1] * 100), Customer.preference_list[1][0],  int(Customer.preference_list[1][1] * 100), Customer.preference_list[2][0],  int(Customer.preference_list[2][1] * 100)))
         print("Customers budget " + str(Customer.customer_budget))
     
+    #Method for checking customers preference for a particular item.
     def check_preference(self, key) -> None:
         print("\nWould you be intereseted in a " + key + "?");
         if Customer.preference_dict[key] >= 0.9:
@@ -121,6 +134,7 @@ class Customer:
             print("Not really.(" + percentage + "%)\n")
             #print(Customer.preference_dict[key]*100)
 
+    #Calculates a chance of sale and prints it
     def check_chance_of_sale(self, market_prices, key) -> None:
         market_price = market_prices[key];
         chance_of_sale_p20 = Customer.preference_dict[key] * 100;
@@ -143,7 +157,8 @@ class Customer:
                 Customer.chance_of_sale_dict[lowest_change] = int(chance);
                 print("Offer " + str(lowest_change) + "%. For a price of " + str(int(market_price)) + ".(" + str(int(chance)) + ")" );
                 lowest_change += 10;
-                
+    
+    #Checks if a sale attempt was successful, transfers credits from customer to a store and substracts any sold weapons from stores stock 
     def attempt_sale(self, gun, price, chance_of_sale) -> None:
         print("\nYou offer a " + gun + " for " + str(price));
         print("The customer checks his budget and thinks a bit")
@@ -181,21 +196,28 @@ class Customer:
             for key, value in Customer.preference_dict.items():
                 Customer.preference_list.append([key, value]);
             Customer.preference_list.sort(key=lambda x: x[1], reverse=True);
-        
 
-#Defining market class
+
 class Market:
     #pistol, shotgun, machine_gun, sub_machine_gun, hunting_knife;
     base_market_prices = {"Pistol":200.0, "Shotgun":300.0, "Machine gun":1000.0, "Sub-machine gun":700.0, "Hunting knife":100.0};
     market_prices = {"Pistol":200.0, "Shotgun":300.0, "Machine gun":1000.0, "Sub-machine gun":700.0, "Hunting knife":100.0};
+
+    #Initialize class
     def __init__(self) -> None:
         pass
+
+    #Change all gun prices by a set percentage
     def change_all_prices(self, change) -> None:
         for key, value in Market.market_prices.items():
             Market.market_prices[key] = value + (value/100*change);
+    
+    #Alter all gun prices by a random percentage after each day
     def alter_prices(self) -> None:
         for key, value in Market.base_market_prices.items():
             Market.market_prices[key] = int(value + (value/100*random.randint(-20, 20)));
+    
+    #Prints current market prices
     def check_prices(self) -> None:
         print("")
         for key, value in Market.market_prices.items():
@@ -247,7 +269,6 @@ while True:
             print("\nA customer walks in.")
             customer_count += 1;
             next_customer = 0;
-            #customer_1.preference_list = [];
             customer_1.set_preference();
             customer_1.set_customer_budget(gun_market.market_prices);
             while True:
